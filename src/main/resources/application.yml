@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: product-activation
+  datasource:
+    url: ${DATABASE_URL:jdbc:h2:mem:activation;MODE=PostgreSQL;DB_CLOSE_DELAY=-1}
+    username: ${DATABASE_USER:sa}
+    password: ${DATABASE_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+server:
+  shutdown: graceful
+  error:
+    include-message: never
+    include-stacktrace: never
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+provider:
+  base-url: ${PROVIDER_BASE_URL:http://localhost:8081}
+  connect-timeout: ${PROVIDER_CONNECT_TIMEOUT:1s}
+  request-timeout: ${PROVIDER_REQUEST_TIMEOUT:2s}
