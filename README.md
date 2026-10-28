@@ -85,7 +85,3 @@ For the challenge's slowdown (API 300ms → 2.5s, SQL 50ms → 1.2s, provider 40
 - Recover requests left in `PENDING` or `PROCESSING` after a crash. Add a durable worker with atomic claims, bounded backoff and provider reconciliation; delivery is not guaranteed today.
 - Preserve failure categories for retry decisions; add PostgreSQL and container execution tests. Compose configuration was validated, but container startup remains unverified.
 - Add correlation IDs, dependency metrics and tracing. Consider an outbox for reliable completion events if a broker is introduced.
-
-## AI use
-
-An OpenAI coding assistant helped generate the implementation, tests and documentation, and analyze the technical tradeoffs.
