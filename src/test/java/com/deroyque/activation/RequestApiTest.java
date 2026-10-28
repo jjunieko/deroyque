@@ -69,6 +69,21 @@ class RequestApiTest {
     }
 
     @Test
+    void servesInteractiveDocumentationAndApiContract() throws Exception {
+        mvc.perform(get("/swagger-ui.html")).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/swagger-ui/index.html")).andExpect(status().isOk());
+        mvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.info.title").value("Product Activation API"))
+                .andExpect(jsonPath("$.paths['/api/v1/requests'].post.responses['201'].headers.Location").exists())
+                .andExpect(jsonPath("$.paths['/api/v1/requests'].post.responses['409']['$ref']")
+                        .value("#/components/responses/Conflict"))
+                .andExpect(jsonPath("$.paths['/api/v1/requests/{id}'].get.responses['404']").exists())
+                .andExpect(jsonPath("$.components.schemas.CreateRequest.properties.externalId.example").value("DEMO-001"))
+                .andExpect(jsonPath("$.components.responses.Conflict.content['application/problem+json'].example.status").value(409));
+    }
+
+    @Test
     void createsAndRetrievesAnActivation() throws Exception {
         String location = mvc.perform(post("/api/v1/requests").contentType("application/json").content(payload("EXT-1")))
                 .andExpect(status().isCreated())

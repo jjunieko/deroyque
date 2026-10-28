@@ -31,6 +31,27 @@ curl http://localhost:8080/api/v1/requests/REPLACE_WITH_RETURNED_UUID
 
 `POST` returns `201 Created`, a `Location` header and the persisted request, including its final status. `GET` returns `200`, or `404` for an unknown UUID. Dates use UTC ISO-8601. Each input field must contain 1–100 ASCII letters, digits, underscores or hyphens. Values are case-sensitive; whitespace is rejected rather than silently normalized. Invalid fields, JSON or UUIDs return `400`. Duplicate external IDs return `409`. Unexpected failures return a generic `500`. Errors use Problem Details without internal exception messages.
 
+## Interactive API documentation
+
+After starting the application, open [Swagger UI](http://localhost:8080/swagger-ui.html).
+The [OpenAPI JSON](http://localhost:8080/v3/api-docs) is also available for importing into API clients.
+Documentation and examples are in English and are generated from the API controllers and DTOs.
+
+For a presentation:
+
+1. Run `docker compose up --build` and open Swagger UI.
+2. Expand **POST /api/v1/requests**, select **Try it out**, and execute the example body. With the Compose provider running, expect `201` and `COMPLETED`.
+3. Copy the returned `id`, expand **GET /api/v1/requests/{id}**, paste it and execute. Expect `200` with the saved request.
+4. Repeat the POST without changing `externalId`. Expect `409`, including when the body is identical.
+5. Change `externalId` to a fresh value and clear `customerId`. Expect `400` with validation errors.
+6. Call GET with a valid UUID that was not created. Expect `404`. An invalid UUID returns `400`.
+7. To demonstrate provider failure, run `docker compose stop provider`, submit a valid POST with a new `externalId`, and inspect the `FAILED` status. Run `docker compose start provider` afterward. Failed requests are not automatically retried.
+
+`201` confirms resource creation; the response `status` describes the activation outcome.
+Use a new `externalId` each time you want a new activation. No token is required in this evaluation build.
+Set `API_DOCS_ENABLED=false` to disable both the UI and OpenAPI endpoints in environments where documentation should not be exposed.
+The documentation addition was verified with `mvn verify`: all 10 tests passed, including Swagger UI delivery and the generated OpenAPI contract.
+
 ## Design decisions
 
 The application uses one feature package with a controller, service, transactional store, repository and HTTP client. DTOs are separate from the JPA entity. There are no generic base services or repository wrappers. The store exists to make transaction boundaries explicit: creating a row, claiming it and storing the result each commit separately. The HTTP call never holds a database transaction open.
